@@ -78,7 +78,7 @@ fn main() {
     let weight = 50.0;
     let prtn = 2.0 * weight;
     let crbs = 7.0 * weight;
-    let fts = 1.0 * weight;
+    let fts = 1.5 * weight;
     let cals = 4.0 * prtn + 4.0 * crbs + 9.0 * fts;
     let fbrs = 0.014 * cals;
 
