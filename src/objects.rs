@@ -25,8 +25,16 @@ impl Nut {
         self.fat *= sc;
     }
     pub fn print(&self) {
-        print!("\n- calories : {:.2}\n- carbs : {:.2}\n- proteins: {:.2}\n- fiber: {:.2}\n- fat: {:.2}\n"
-            ,self.cal, self.carb, self.prot, self.fiber, self.fat );
+        print!(
+            "\n- calories : {:.2}\n- carbs : {:.2}\n- proteins: {:.2}\n- fiber: {:.2}\n- fat: {:.2}\n",
+            self.cal, self.carb, self.prot, self.fiber, self.fat
+        );
+    }
+    pub fn printb(&self) {
+        print!(
+            "\n- carbs : {:.2}\n- proteins: {:.2}\n- fiber: {:.2}\n- fat: {:.2}\n\n",
+            self.carb, self.prot, self.fiber, self.fat
+        );
     }
 }
 

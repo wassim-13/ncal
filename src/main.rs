@@ -1,6 +1,6 @@
 mod objects;
 
-use objects::{getnut, Nut};
+use objects::{Nut, getnut};
 
 use evalexpr::*;
 use std::env;
@@ -47,13 +47,13 @@ fn main() {
             neg = false;
         }
 
-        if s.bytes().nth(0).unwrap().is_ascii_digit() || neg {
+        if s.as_bytes()[0].is_ascii_digit() || neg {
             for b in s.bytes() {
                 if b.is_ascii_digit() {
                     n = n * 10 + (b - b'0') as i64;
-                } else {
-                    break;
+                    continue;
                 }
+                break;
             }
             if neg {
                 n = -n;
@@ -75,16 +75,23 @@ fn main() {
     println!("-----total---------");
     snut.print();
 
+    let weight = 50.0;
+    let prtn = 2.0 * weight;
+    let crbs = 7.0 * weight;
+    let fts = 1.0 * weight;
+    let cals = 4.0 * prtn + 4.0 * crbs + 9.0 * fts;
+    let fbrs = 0.014 * cals;
+
     snut.scal(-1.0);
     snut.add(Nut {
-        cal: 3000.0,
-        carb: 450.0,
-        prot: 110.0,
-        fiber: 30.0,
-        fat: 80.0,
+        cal: cals,
+        carb: crbs,
+        prot: prtn,
+        fiber: fbrs,
+        fat: fts,
     });
     println!("\n-----left----------");
-    snut.print();
+    snut.printb();
 
     let end = Instant::now();
     let start = end.duration_since(start).as_micros();
