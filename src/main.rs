@@ -3,7 +3,8 @@ mod objects;
 use objects::{Nut, getnut};
 
 use evalexpr::*;
-use std::env;
+use std::env::{self, args};
+use std::process::exit;
 use std::time::Instant;
 
 fn parse_input(s: &str) -> (&str, f64) {
@@ -31,8 +32,17 @@ fn main() {
         fat: 0.0,
     };
 
-    args.swap_remove(0);
+    if args.len() > 2 && args[1].eq("-g") {
+        args.swap_remove(0);
+        args.swap_remove(1);
+        for s in args {
+            println!("\n=> {s}\n");
+            getnut(s.as_str()).unwrap().print();
+        }
+        exit(0);
+    }
 
+    args.swap_remove(0);
     for mut s in args {
         let mut n: i64 = 0;
         let mut neg = false;
@@ -90,6 +100,13 @@ fn main() {
         fiber: fbrs,
         fat: fts,
     });
+
+    for th in &mut snut {
+        if *th < 0.0 {
+            *th = 0.0;
+        }
+    }
+
     println!("\n-----left----------");
     snut.printb();
 

@@ -9,6 +9,22 @@ pub struct Nut {
     pub fat: f64,
 }
 
+impl<'a> IntoIterator for &'a mut Nut {
+    type Item = &'a mut f64;
+    type IntoIter = std::array::IntoIter<&'a mut f64, 5>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        [
+            &mut self.carb,
+            &mut self.cal,
+            &mut self.prot,
+            &mut self.fiber,
+            &mut self.fat,
+        ]
+        .into_iter()
+    }
+}
+
 impl Nut {
     pub fn add(&mut self, other: Nut) {
         self.cal += other.cal;
@@ -26,13 +42,13 @@ impl Nut {
     }
     pub fn print(&self) {
         print!(
-            "\n- calories : {:.2}\n- carbs : {:.2}\n- proteins: {:.2}\n- fiber: {:.2}\n- fat: {:.2}\n",
+            "- calories : {:.2}\n- carbs : {:.2}\n- proteins: {:.2}\n- fiber: {:.2}\n- fat: {:.2}\n",
             self.cal, self.carb, self.prot, self.fiber, self.fat
         );
     }
     pub fn printb(&self) {
         print!(
-            "\n- carbs : {:.2}\n- proteins: {:.2}\n- fiber: {:.2}\n- fat: {:.2}\n\n",
+            "- carbs : {:.2}\n- proteins: {:.2}\n- fiber: {:.2}\n- fat: {:.2}\n\n",
             self.carb, self.prot, self.fiber, self.fat
         );
     }
@@ -71,10 +87,20 @@ fn build_objects() -> HashMap<&'static str, Nut> {
         },
     );
     map.insert(
+        "amlo",
+        Nut {
+            cal: 5.58,
+            carb: 0.338,
+            prot: 0.122,
+            fiber: 0.069,
+            fat: 0.453,
+        },
+    );
+    map.insert(
         "bread",
         Nut {
             cal: 2.7,
-            carb: 0.55,
+            carb: 0.50,
             prot: 0.12,
             fiber: 0.02,
             fat: 0.02,
