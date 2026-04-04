@@ -3,7 +3,7 @@ mod objects;
 use objects::{Nut, getnut};
 
 use evalexpr::*;
-use std::env::{self, args};
+use std::env::{self};
 use std::process::exit;
 use std::time::Instant;
 
@@ -41,8 +41,22 @@ fn main() {
         }
         exit(0);
     }
+    let mut weight = 50.0;
+
+    if args.len() > 2 && args[1].eq("-s") {
+        if args.len() > 2 {
+            weight = args[2].trim().parse().expect("failed to read weight");
+        }
+
+        args.swap_remove(1);
+        match args.len() {
+            2 => args.swap_remove(1),
+            _ => args.swap_remove(2),
+        };
+    }
 
     args.swap_remove(0);
+
     for mut s in args {
         let mut n: i64 = 0;
         let mut neg = false;
@@ -85,7 +99,6 @@ fn main() {
     println!("-----total---------");
     snut.print();
 
-    let weight = 50.0;
     let prtn = 2.0 * weight;
     let crbs = 7.0 * weight;
     let fts = 1.5 * weight;
