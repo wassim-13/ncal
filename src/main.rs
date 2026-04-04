@@ -1,11 +1,13 @@
 mod objects;
 
-use objects::{Nut, getnut};
+use objects::Nut;
 
 use evalexpr::*;
 use std::env::{self};
 use std::process::exit;
 use std::time::Instant;
+
+use crate::objects::build_objects;
 
 fn parse_input(s: &str) -> (&str, f64) {
     let (text, number) = s
@@ -32,15 +34,6 @@ fn main() {
         fat: 0.0,
     };
 
-    if args.len() > 2 && args[1].eq("-g") {
-        args.swap_remove(0);
-        args.swap_remove(1);
-        for s in args {
-            println!("\n=> {s}\n");
-            getnut(s.as_str()).unwrap().print();
-        }
-        exit(0);
-    }
     let mut weight = 50.0;
 
     if args.len() > 2 && args[1].eq("-s") {
@@ -56,6 +49,25 @@ fn main() {
     }
 
     args.swap_remove(0);
+
+    if args.is_empty() {
+        exit(0);
+    }
+
+    let mut objs = build_objects();
+
+    if args.len() > 1 && args[1].trim().eq("-g") {
+        args.swap_remove(1);
+        for s in args {
+            println!("\n=> {s}\n");
+
+            match objs.get(s.as_str()) {
+                Some(obj) => obj.print(),
+                None => println!("object {s} not found!"),
+            }
+        }
+        exit(0);
+    }
 
     for mut s in args {
         let mut n: i64 = 0;
@@ -88,7 +100,7 @@ fn main() {
 
         let (tname, val) = parse_input(s.as_str());
 
-        if let Some(mut obj) = getnut(tname) {
+        if let Some(obj) = objs.get_mut(tname) {
             obj.scal(val);
             snut.add(obj);
         } else {
@@ -106,7 +118,7 @@ fn main() {
     let fbrs = 0.014 * cals;
 
     snut.scal(-1.0);
-    snut.add(Nut {
+    snut.add(&Nut {
         cal: cals,
         carb: crbs,
         prot: prtn,

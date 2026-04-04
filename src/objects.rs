@@ -26,7 +26,7 @@ impl<'a> IntoIterator for &'a mut Nut {
 }
 
 impl Nut {
-    pub fn add(&mut self, other: Nut) {
+    pub fn add(&mut self, other: &Nut) {
         self.cal += other.cal;
         self.carb += other.carb;
         self.prot += other.prot;
@@ -54,7 +54,7 @@ impl Nut {
     }
 }
 
-fn build_objects() -> HashMap<&'static str, Nut> {
+pub fn build_objects() -> HashMap<&'static str, Nut> {
     let mut map = HashMap::new();
     map.insert(
         "apple",
@@ -387,11 +387,5 @@ fn build_objects() -> HashMap<&'static str, Nut> {
             fat: 0.0,
         },
     );
-
     map
-}
-
-pub fn getnut(name: &str) -> Option<Nut> {
-    let objects = build_objects();
-    objects.get(name).cloned()
 }
