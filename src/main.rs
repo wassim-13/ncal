@@ -2,17 +2,23 @@ mod objects;
 
 use objects::Nut;
 
+use crate::objects::build_objects;
 use evalexpr::*;
 use std::env::{self};
+use std::io::{Write, stdin, stdout};
 use std::process::exit;
-use std::time::Instant;
-
-use crate::objects::build_objects;
 
 fn parse_input(s: &str) -> (&str, f64) {
-    let (text, number) = s
-        .rsplit_once('_')
-        .expect("Input must contain exactly one '_'");
+    let mut num = String::new();
+    let (text, number) = match s.rsplit_once("_") {
+        Some(val) => val,
+        None => {
+            print!("value for {s} ? : ");
+            stdout().flush().unwrap();
+            stdin().read_line(&mut num).expect("failed to read number!");
+            (s, num.as_str())
+        }
+    };
 
     if number.is_empty() {
         return (text, 0.0);
@@ -22,8 +28,6 @@ fn parse_input(s: &str) -> (&str, f64) {
 }
 
 fn main() {
-    let start = Instant::now();
-
     let mut args: Vec<String> = env::args().collect();
 
     let mut snut = Nut {
@@ -143,9 +147,4 @@ fn main() {
 
     println!("\n-----left----------");
     snut.printb();
-
-    let end = Instant::now();
-    let start = end.duration_since(start).as_micros();
-
-    println!("time took : {start} us");
 }
