@@ -69,6 +69,15 @@ fn main() {
         exit(0);
     }
 
+    let b1 = args.len() == 1 && args[0].trim().eq("-l");
+    let b2 = args.len() > 1 && args[1].trim().eq("-l");
+    if b1 || b2 {
+        for key in objs.keys() {
+            println!("{key}");
+        }
+        exit(0);
+    }
+
     for mut s in args {
         let mut n: i64 = 0;
         let mut neg = false;
