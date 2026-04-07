@@ -5,8 +5,21 @@ use objects::Nut;
 use crate::objects::build_objects;
 use evalexpr::*;
 use std::env::{self};
-use std::io::{Write, stdin, stdout};
+use std::io::{LineWriter, Write, stdin, stdout};
 use std::process::exit;
+
+fn eval_num(expr: &str) -> f64 {
+    match eval_float(expr) {
+        Ok(val) => val,
+        Err(err) => match err {
+            EvalexprError::ExpectedFloat { actual: _ } => match eval_int(expr) {
+                Ok(val) => val as f64,
+                Err(_) => 0.0,
+            },
+            _ => 0.0,
+        },
+    }
+}
 
 fn parse_input(s: &str) -> (&str, f64) {
     let mut num = String::new();
@@ -23,8 +36,8 @@ fn parse_input(s: &str) -> (&str, f64) {
     if number.is_empty() {
         return (text, 0.0);
     };
-    let num = eval_int(number).expect("error eval") as f64;
-    (text, num)
+    let number = eval_num(number);
+    (text, number)
 }
 
 fn main() {
@@ -37,6 +50,8 @@ fn main() {
         fiber: 0.0,
         fat: 0.0,
     };
+
+    let mut tliter = 0.0;
 
     let mut weight = 50.0;
 
@@ -83,9 +98,8 @@ fn main() {
     }
 
     for mut s in args {
-        let mut n: i64 = 0;
         let mut neg = false;
-
+        let mut liter = false;
         if s.starts_with('-') {
             s.remove(0);
             neg = true;
@@ -93,21 +107,26 @@ fn main() {
 
         if s.starts_with('+') {
             s.remove(0);
-            neg = false;
+            neg = true;
         }
 
-        if s.as_bytes()[0].is_ascii_digit() || neg {
-            for b in s.bytes() {
-                if b.is_ascii_digit() {
-                    n = n * 10 + (b - b'0') as i64;
-                    continue;
-                }
-                break;
+        if s.ends_with("l") {
+            s.pop();
+            liter = true;
+        }
+
+        let temp_b1 = s.starts_with("(");
+        let temp_b2 = s.as_bytes()[0].is_ascii_digit();
+        if (temp_b2 || neg || temp_b1) && !liter {
+            snut.cal += eval_num(s.as_str());
+            continue;
+        } else if (temp_b1 || temp_b2 || neg) && liter {
+            if s.ends_with("m") {
+                s.pop();
+                tliter += eval_num(s.as_str()) / 1000.0;
+                continue;
             }
-            if neg {
-                n = -n;
-            }
-            snut.cal += n as f64;
+            tliter += eval_num(s.as_str());
             continue;
         }
 
@@ -147,4 +166,23 @@ fn main() {
 
     println!("\n-----left----------");
     snut.printb();
+    println!("\n-----water----------");
+    println!("{}", progress_bar(tliter, 2.0));
+}
+
+fn progress_bar(current: f64, total: f64) -> String {
+    let width = 25;
+    let ratio = if total <= 0.0 {
+        0.0
+    } else {
+        (current / total).clamp(0.0, 1.0)
+    };
+
+    let filled = (ratio * width as f64).round() as usize;
+    let empty = width - filled;
+
+    let filled_part = format!("\x1b[36m{}\x1b[0m", "■".repeat(filled));
+    let empty_part = "□".repeat(empty);
+
+    format!("[{}{}] {:.1}%", filled_part, empty_part, ratio * 100.0)
 }

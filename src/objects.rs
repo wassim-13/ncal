@@ -218,6 +218,16 @@ pub fn build_objects() -> HashMap<&'static str, Nut> {
         },
     );
     map.insert(
+        "fava",
+        Nut {
+            cal: 0.3,
+            carb: 0.065,
+            prot: 0.025,
+            fiber: 0.2,
+            fat: 0.002,
+        },
+    );
+    map.insert(
         "grape",
         Nut {
             cal: 0.69,
@@ -360,11 +370,11 @@ pub fn build_objects() -> HashMap<&'static str, Nut> {
     map.insert(
         "rice",
         Nut {
-            cal: 3.6,
+            cal: 1.3,
             carb: 0.28,
             prot: 0.06,
-            fiber: 0.0,
-            fat: 0.0,
+            fiber: 0.004,
+            fat: 0.003,
         },
     );
     map.insert(
@@ -375,6 +385,16 @@ pub fn build_objects() -> HashMap<&'static str, Nut> {
             prot: 0.0,
             fiber: 0.037,
             fat: 0.0,
+        },
+    );
+    map.insert(
+        "squid",
+        Nut {
+            cal: 0.92,
+            carb: 0.02,
+            prot: 0.15,
+            fiber: 0.0,
+            fat: 0.013,
         },
     );
     map.insert(
