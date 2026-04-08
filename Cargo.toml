@@ -4,4 +4,5 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-evalexpr = "11"
+evalexpr = "13.1.0"
+unicode-width = "0.2.2"

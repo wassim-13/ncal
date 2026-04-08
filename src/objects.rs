@@ -1,3 +1,4 @@
+use crate::printing::{Color, left_right, progress_bar};
 use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
@@ -46,14 +47,32 @@ impl Nut {
             self.cal, self.carb, self.prot, self.fiber, self.fat
         );
     }
-    pub fn printb(&self) {
+    pub fn printb(&self, needs: &Nut) {
         print!(
-            "- carbs : {:.2}\n- proteins: {:.2}\n- fiber: {:.2}\n- fat: {:.2}\n\n",
-            self.carb, self.prot, self.fiber, self.fat
+            "{}\n{}\n{}\n{}\n",
+            left_right(
+                &format!("carbs : {:.2}", self.carb),
+                &progress_bar(needs.carb - self.carb, needs.carb, 25, Color::Orange),
+                53
+            ),
+            left_right(
+                &format!("proteins : {:.2}", self.prot),
+                &progress_bar(needs.prot - self.prot, needs.prot, 25, Color::Grey),
+                53
+            ),
+            left_right(
+                &format!("fat : {:.2}", self.fat),
+                &progress_bar(needs.fat - self.fat, needs.fat, 25, Color::Amber),
+                53
+            ),
+            left_right(
+                &format!("fiber : {:.2}", self.fiber),
+                &progress_bar(needs.fiber - self.fiber, needs.fiber, 25, Color::Green),
+                53
+            ),
         );
     }
 }
-
 pub fn build_objects() -> HashMap<&'static str, Nut> {
     let mut map = HashMap::new();
     map.insert(
@@ -151,7 +170,7 @@ pub fn build_objects() -> HashMap<&'static str, Nut> {
         Nut {
             cal: 1.64,
             carb: 0.27,
-            prot: 0.0,
+            prot: 0.089,
             fiber: 0.076,
             fat: 0.02,
         },

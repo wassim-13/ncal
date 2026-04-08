@@ -1,11 +1,13 @@
 mod objects;
+mod printing;
 
 use objects::Nut;
 
 use crate::objects::build_objects;
+use crate::printing::progress_bar;
 use evalexpr::*;
 use std::env::{self};
-use std::io::{LineWriter, Write, stdin, stdout};
+use std::io::{Write, stdin, stdout};
 use std::process::exit;
 
 fn eval_num(expr: &str) -> f64 {
@@ -165,24 +167,13 @@ fn main() {
     }
 
     println!("\n-----left----------");
-    snut.printb();
+    snut.printb(&Nut {
+        cal: cals,
+        carb: crbs,
+        prot: prtn,
+        fat: fts,
+        fiber: fbrs,
+    });
     println!("\n-----water----------");
-    println!("{}", progress_bar(tliter, 2.0));
-}
-
-fn progress_bar(current: f64, total: f64) -> String {
-    let width = 25;
-    let ratio = if total <= 0.0 {
-        0.0
-    } else {
-        (current / total).clamp(0.0, 1.0)
-    };
-
-    let filled = (ratio * width as f64).round() as usize;
-    let empty = width - filled;
-
-    let filled_part = format!("\x1b[36m{}\x1b[0m", "■".repeat(filled));
-    let empty_part = "□".repeat(empty);
-
-    format!("[{}{}] {:.1}%", filled_part, empty_part, ratio * 100.0)
+    println!("{}", progress_bar(tliter, 2.0, 45, printing::Color::Blue));
 }
