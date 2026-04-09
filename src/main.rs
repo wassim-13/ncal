@@ -1,3 +1,4 @@
+mod flags;
 mod objects;
 mod printing;
 
