@@ -1,7 +1,12 @@
-use crate::printing::{Color, left_right, progress_bar};
-use std::collections::HashMap;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone)]
+use crate::{
+    d_log,
+    printing::{Color, left_right, progress_bar},
+};
+use std::{collections::HashMap, fs, path::Path};
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Nut {
     pub cal: f64,
     pub carb: f64,
@@ -72,6 +77,36 @@ impl Nut {
             ),
         );
     }
+}
+
+pub fn get_nut_from_file<P: AsRef<Path>>(path: P) -> Nut {
+    d_log!("==> getting nut from file {}", path.as_ref().display());
+    let contents = fs::read_to_string(path).unwrap_or_default();
+    match serde_yaml::from_str(&contents) {
+        Ok(nu) => nu,
+        Err(err) => {
+            eprint!("error : {err}");
+            Nut {
+                cal: 0.0,
+                carb: 0.0,
+                prot: 0.0,
+                fiber: 0.0,
+                fat: 0.0,
+            }
+        }
+    }
+}
+pub fn store_nut_to_file<P: AsRef<Path>>(
+    path: P,
+    nuts: &Nut,
+) -> Result<(), Box<dyn std::error::Error>> {
+    d_log!(
+        "==> storing nut to file with path {} and nuts {nuts:?}",
+        path.as_ref().display()
+    );
+    let contents = serde_yaml::to_string(&nuts)?;
+    fs::write(path, contents)?;
+    Ok(())
 }
 pub fn build_objects() -> HashMap<&'static str, Nut> {
     let mut map = HashMap::new();
