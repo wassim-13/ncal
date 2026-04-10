@@ -6,6 +6,7 @@ mod printing;
 mod run;
 
 fn main() {
-    let data = run::RunC::new();
+    let mut data = run::RunC::new();
+    data.init();
     data.run();
 }

@@ -1,15 +1,11 @@
 use crate::d_log;
+use crate::flags::FlData;
 use crate::objects::{self, Nut};
 use crate::parse::{eval_num, parse_input};
 use crate::printing::{Color, progress_bar};
-use std::collections::HashMap;
-use std::env;
-use std::fs::OpenOptions;
-use std::process::exit;
 
 use std::path::{Path, PathBuf};
-
-use crate::flags::{FlData, RunMode};
+use std::{collections::HashMap, env, fs::OpenOptions, process};
 
 #[derive(Clone, Debug)]
 pub struct RunC {
@@ -21,39 +17,21 @@ pub struct RunC {
     objects: HashMap<&'static str, Nut>,
 }
 
+enum DM {
+    Fd,
+    Nd,
+}
+
 impl RunC {
     pub fn new() -> Self {
-        let rmod = RunMode {
-            verbose: false,
-            list: false,
-            normal: true,
-        };
-        let fld = FlData {
-            data_tg: Vec::new(),
-            data_ta: Vec::new(),
-            data_tf: Vec::new(),
-            data_s: 50.0,
-            runmod: rmod,
-            file: PathBuf::from("/home/wassim/foo/cal/data/data.yaml"),
-        };
-        let tnt = Nut {
-            fiber: 0.0,
-            fat: 0.0,
-            cal: 0.0,
-            carb: 0.0,
-            prot: 0.0,
-        };
-        let pnt = tnt.clone();
-        let mut data: RunC = RunC {
-            data: fld,
+        Self {
+            data: FlData::new(),
             args: Vec::new(),
-            tnut: tnt.clone(),
-            pnut: pnt.clone(),
+            tnut: Nut::new(),
+            pnut: Nut::new(),
             tliter: 3.0,
             objects: HashMap::new(),
-        };
-        data.init();
-        data
+        }
     }
     pub fn init(&mut self) {
         self.objects = objects::build_objects();
@@ -107,7 +85,7 @@ impl RunC {
             println!("incompatible options `list` and `normal`");
             println!("however heres the list");
             self.list_all();
-            exit(0);
+            process::exit(0);
         }
         if !data.data_tg.is_empty() {
             self.run_as_getn();
@@ -117,7 +95,7 @@ impl RunC {
         let b2 = !data.data_tf.is_empty();
 
         if b1 {
-            self.run_as_normal(&mut self.data.data_ta.clone());
+            self.run_as_normal(DM::Nd);
         }
         if b2 {
             self.run_as_addn();
@@ -135,8 +113,13 @@ impl RunC {
             }
         }
     }
-    fn run_as_normal(&mut self, data: &mut Vec<String>) {
+    fn run_as_normal(&mut self, mode: DM) {
         d_log!("->> running as normal!");
+        let data = match mode {
+            DM::Fd => &mut self.data.data_tf,
+            DM::Nd => &mut self.data.data_ta,
+        };
+
         for s in data.iter_mut() {
             d_log!("-> handling {s} expression");
             let mut neg = false;
@@ -189,14 +172,16 @@ impl RunC {
             }
         }
         d_log!("heres total nut : {:#?}", self.tnut);
+        println!("=> total nuts");
         self.tnut.print();
+        println!("=> left nuts");
+        self.tnut.printb(&self.pnut);
     }
     fn run_as_addn(&mut self) {
         d_log!("->> running as add");
         self.tnut = objects::get_nut_from_file(&self.data.file);
         d_log!("-> total nut before normal run : {:#?}", self.tnut);
-        let data = &mut self.data.data_tf.clone();
-        self.run_as_normal(data);
+        self.run_as_normal(DM::Fd);
         d_log!("-> total nut after normal run: {:#?}", self.tnut);
         objects::store_nut_to_file(&self.data.file, &self.tnut).unwrap_or_default();
     }

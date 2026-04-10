@@ -77,6 +77,15 @@ impl Nut {
             ),
         );
     }
+    pub fn new() -> Self {
+        Self {
+            cal: 0.0,
+            carb: 0.0,
+            prot: 0.0,
+            fiber: 0.0,
+            fat: 0.0,
+        }
+    }
 }
 
 pub fn get_nut_from_file<P: AsRef<Path>>(path: P) -> Nut {
