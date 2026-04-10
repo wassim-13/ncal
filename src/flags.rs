@@ -53,7 +53,7 @@ impl FlData {
                             self.runmod.normal = true;
                             set_false(&mut add_s, &mut add_g, &mut add_file);
                         }
-                        's' => {
+                        'w' => {
                             add_s = true;
                             self.runmod.normal = true;
                             set_false(&mut add_g, &mut add_f, &mut add_file);
@@ -67,6 +67,12 @@ impl FlData {
                         'v' => {
                             self.runmod.verbose = true;
                             debug::set_debug(self.runmod.verbose);
+                        }
+                        'i' => {
+                            println!("adding items will cost unecessarly performance!");
+                            println!("add items by your self bro");
+                            println!("here' the file to add stuff $proj_dir/data/objects.yaml");
+                            println!("see it's just yaml to make your life easier ;)");
                         }
                         _ => {
                             println!("option {ch} not found!");
@@ -97,6 +103,12 @@ impl FlData {
                             add_s = true;
                             self.runmod.normal = true;
                             set_false(&mut add_g, &mut add_f, &mut add_file);
+                        }
+                        "--insert" => {
+                            println!("adding items will cost unecessarly performance!");
+                            println!("add items by your self bro");
+                            println!("here' the file to add stuff $proj_dir/data/objects.yaml");
+                            println!("see it's just yaml to make your life easier ;)");
                         }
                         "--s-file" => {
                             add_file = true;
@@ -174,6 +186,7 @@ Options:
     -v, --verbose      Enable verbose output
     -s, --set-weight   Set the weight to
     -a, --add          Remember the input
+    -i, --insert       Insert an item to objects 
     -g, --get          Get nutrition of the input
     -l, --list         List all food"
     );

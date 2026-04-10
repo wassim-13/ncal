@@ -1,11 +1,18 @@
 use crate::d_log;
 use crate::flags::FlData;
 use crate::objects::{self, Nut};
-use crate::parse::{eval_num, parse_input};
+use crate::parse::{Nwc, get_w_add};
 use crate::printing::{Color, progress_bar};
 
+use std::fs;
 use std::path::{Path, PathBuf};
 use std::{collections::HashMap, env, fs::OpenOptions, process};
+
+#[derive(Clone, Debug)]
+struct Objects {
+    objects: HashMap<String, Nut>,
+    path: PathBuf,
+}
 
 #[derive(Clone, Debug)]
 pub struct RunC {
@@ -14,7 +21,7 @@ pub struct RunC {
     tnut: Nut,
     pnut: Nut,
     tliter: f64,
-    objects: HashMap<&'static str, Nut>,
+    objects: Objects,
 }
 
 enum DM {
@@ -30,11 +37,13 @@ impl RunC {
             tnut: Nut::new(),
             pnut: Nut::new(),
             tliter: 3.0,
-            objects: HashMap::new(),
+            objects: Objects {
+                path: PathBuf::new(),
+                objects: HashMap::new(),
+            },
         }
     }
     pub fn init(&mut self) {
-        self.objects = objects::build_objects();
         self.args = env::args().collect();
         self.args.remove(0);
         self.data.parse_args(&self.args);
@@ -42,7 +51,7 @@ impl RunC {
         self.args.clear();
         d_log!("-> clearing args, done");
         if !check_file(&self.data.file) {
-            self.data.file = PathBuf::from("/home/wassim/foo/cal/data/data.txt");
+            self.data.file = PathBuf::from("/home/wassim/foo/cal/data/data.yaml");
         }
         d_log!(
             "-> setting filepath, done\n        filepath : {}",
@@ -75,9 +84,12 @@ impl RunC {
             self.pnut
         );
         self.tliter = 2.0;
+
+        self.objects.path = PathBuf::from("/home/wassim/foo/cal/data/objects.yaml");
+        let contents = fs::read_to_string(&self.objects.path).unwrap_or_default();
+        self.objects.objects = serde_yaml::from_str(&contents).unwrap_or_default();
     }
     pub fn run(mut self) {
-        // alias vars
         let runmod = &self.data.runmod;
         let data = &self.data;
 
@@ -107,7 +119,7 @@ impl RunC {
         for s in self.data.data_tg.iter() {
             println!("\n=> {s}\n");
 
-            match self.objects.get(s.as_str()) {
+            match self.objects.objects.get(s.as_str()) {
                 Some(obj) => obj.print(),
                 None => println!("object {s} not found!"),
             }
@@ -119,63 +131,24 @@ impl RunC {
             DM::Fd => &mut self.data.data_tf,
             DM::Nd => &mut self.data.data_ta,
         };
-
         for s in data.iter_mut() {
-            d_log!("-> handling {s} expression");
-            let mut neg = false;
-            let mut liter = false;
-            if s.starts_with('-') {
-                s.remove(0);
-                neg = true;
-            }
-
-            if s.starts_with('+') {
-                s.remove(0);
-                neg = true;
-            }
-
-            if s.ends_with("l") {
-                s.pop();
-                liter = true;
-            }
-
-            let temp_b1 = s.starts_with("(");
-            let temp_b2 = s.as_bytes()[0].is_ascii_digit();
-            if (temp_b2 || neg || temp_b1) && !liter {
-                let val = eval_num(s.as_str());
-                self.tnut.cal += val;
-                d_log!("-> adding value {val} to total nut cal, done");
-                continue;
-            } else if (temp_b1 || temp_b2 || neg) && liter {
-                if s.ends_with("m") {
-                    s.pop();
-                    let val = eval_num(s.as_str()) / 1000.0;
-                    d_log!("-> adding value {val} to total liter, done");
-                    self.tliter += val;
-                    continue;
+            match get_w_add(s) {
+                Nwc::C(cal) => self.tnut.cal += cal,
+                Nwc::W(wtr) => self.tliter += wtr,
+                Nwc::N(tname, val) => {
+                    let mut obj = self.objects.objects.get(tname).unwrap().clone();
+                    obj.scal(val);
+                    self.tnut.add(&obj);
                 }
-                let val = eval_num(s.as_str()) / 1000.0;
-                d_log!("-> adding value {val} to total liter, done");
-                self.tliter += val;
-
-                continue;
-            }
-
-            let (tname, val) = parse_input(s.as_str());
-
-            if let Some(obj) = self.objects.get_mut(tname) {
-                obj.scal(val);
-                self.tnut.add(obj);
-                d_log!("added obj values to total nut");
-            } else {
-                println!("Object {tname} not found");
             }
         }
         d_log!("heres total nut : {:#?}", self.tnut);
-        println!("=> total nuts");
+        println!("=> total nuts\n");
         self.tnut.print();
-        println!("=> left nuts");
-        self.tnut.printb(&self.pnut);
+        if !self.data.runmod.minimal {
+            println!("\n=> left nuts\n");
+            self.tnut.printb(&self.pnut);
+        }
     }
     fn run_as_addn(&mut self) {
         d_log!("->> running as add");
@@ -186,7 +159,7 @@ impl RunC {
         objects::store_nut_to_file(&self.data.file, &self.tnut).unwrap_or_default();
     }
     fn list_all(self) {
-        for key in self.objects.keys() {
+        for key in self.objects.objects.keys() {
             println!("{key}");
         }
     }
