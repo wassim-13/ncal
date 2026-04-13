@@ -4,15 +4,10 @@ use crate::objects::{self, Nut};
 use crate::parse::{Nwc, get_w_add};
 use crate::printing::{Color, progress_bar};
 
-use std::fs;
-use std::path::{Path, PathBuf};
+use std::io::Write;
+use std::path::Path;
 use std::{collections::HashMap, env, fs::OpenOptions, process};
-
-#[derive(Clone, Debug)]
-struct Objects {
-    objects: HashMap<String, Nut>,
-    path: PathBuf,
-}
+use std::{fs, io};
 
 #[derive(Clone, Debug)]
 pub struct RunC {
@@ -21,7 +16,7 @@ pub struct RunC {
     tnut: Nut,
     pnut: Nut,
     tliter: f64,
-    objects: Objects,
+    objects: HashMap<String, Nut>,
 }
 
 enum DM {
@@ -37,10 +32,7 @@ impl RunC {
             tnut: Nut::new(),
             pnut: Nut::new(),
             tliter: 3.0,
-            objects: Objects {
-                path: PathBuf::new(),
-                objects: HashMap::new(),
-            },
+            objects: HashMap::new(),
         }
     }
     pub fn init(&mut self) {
@@ -50,13 +42,13 @@ impl RunC {
         d_log!("-> parsing args, done");
         self.args.clear();
         d_log!("-> clearing args, done");
-        if !check_file(&self.data.file) {
-            self.data.file = PathBuf::from("/home/wassim/foo/cal/data/data.yaml");
-        }
         d_log!(
             "-> setting filepath, done\n        filepath : {}",
-            self.data.file.display()
+            self.data.t_file.display()
         );
+        if self.data.runmod.clear {
+            objects::trunc_line(&self.data.t_file, &String::new()).unwrap_or_default();
+        }
         self.tnut = Nut {
             cal: 0.0,
             carb: 0.0,
@@ -85,9 +77,17 @@ impl RunC {
         );
         self.tliter = 2.0;
 
-        self.objects.path = PathBuf::from("/home/wassim/foo/cal/data/objects.yaml");
-        let contents = fs::read_to_string(&self.objects.path).unwrap_or_default();
-        self.objects.objects = serde_yaml::from_str(&contents).unwrap_or_default();
+        d_log!("-> opjects path : {}", &self.data.o_file.display());
+        let contents = fs::read_to_string(&self.data.o_file).unwrap_or_default();
+        self.objects = serde_yaml::from_str(&contents).unwrap_or_default();
+
+        d_log!(
+            "-> successfully loaded {} objects",
+            &self.objects.keys().count()
+        );
+        if self.data.runmod.insert {
+            insert_item(&self.data.o_file, &mut self.objects).unwrap();
+        }
     }
     pub fn run(mut self) {
         let runmod = &self.data.runmod;
@@ -119,7 +119,7 @@ impl RunC {
         for s in self.data.data_tg.iter() {
             println!("\n=> {s}\n");
 
-            match self.objects.objects.get(s.as_str()) {
+            match self.objects.get(s.as_str()) {
                 Some(obj) => obj.print(),
                 None => println!("object {s} not found!"),
             }
@@ -136,9 +136,15 @@ impl RunC {
                 Nwc::C(cal) => self.tnut.cal += cal,
                 Nwc::W(wtr) => self.tliter += wtr,
                 Nwc::N(tname, val) => {
-                    let mut obj = self.objects.objects.get(tname).unwrap().clone();
+                    let obj = match self.objects.get_mut(tname) {
+                        Some(ob) => ob,
+                        None => {
+                            println!("object {tname} not found");
+                            &mut Nut::new()
+                        }
+                    };
                     obj.scal(val);
-                    self.tnut.add(&obj);
+                    self.tnut.add(obj);
                 }
             }
         }
@@ -152,14 +158,14 @@ impl RunC {
     }
     fn run_as_addn(&mut self) {
         d_log!("->> running as add");
-        self.tnut = objects::get_nut_from_file(&self.data.file);
+        self.tnut = objects::get_nut_from_file(&self.data.t_file);
         d_log!("-> total nut before normal run : {:#?}", self.tnut);
         self.run_as_normal(DM::Fd);
         d_log!("-> total nut after normal run: {:#?}", self.tnut);
-        objects::store_nut_to_file(&self.data.file, &self.tnut).unwrap_or_default();
+        objects::store_nut_to_file(&self.data.t_file, &self.tnut).unwrap_or_default();
     }
     fn list_all(self) {
-        for key in self.objects.objects.keys() {
+        for key in self.objects.keys() {
             println!("{key}");
         }
     }
@@ -168,7 +174,7 @@ impl RunC {
     }
 }
 
-fn check_file<P: AsRef<Path>>(path: P) -> bool {
+pub fn check_file<P: AsRef<Path>>(path: P) -> bool {
     let path = path.as_ref();
 
     if !path.exists() {
@@ -176,4 +182,45 @@ fn check_file<P: AsRef<Path>>(path: P) -> bool {
         return false;
     }
     OpenOptions::new().read(true).write(true).open(path).is_ok()
+}
+fn insert_item<P: AsRef<Path>>(
+    path: P,
+    objs: &mut HashMap<String, Nut>,
+) -> Result<(), Box<dyn std::error::Error>> {
+    //
+    println!("inserting items,\ninput must be : `item_name` `cal` `carb` `prot` `fiber` `fat`");
+
+    loop {
+        let mut input = String::new();
+        print!("obj : ");
+        io::stdout().flush()?;
+        io::stdin().read_line(&mut input).unwrap_or_default();
+        let mut parts = input.split_whitespace();
+
+        let name = parts.next().unwrap().to_string();
+        let mut obj = Nut::new();
+
+        for f in obj.into_iter() {
+            *f = parts.next().unwrap_or("0").parse().unwrap_or_default();
+        }
+        if objs.contains_key(&name) {
+            println!("object {name} already exists! modifying it's values");
+        }
+        objs.insert(name, obj);
+
+        print!("add another item? : ");
+        io::stdout().flush()?;
+        let mut ans = String::new();
+        io::stdin().read_line(&mut ans)?;
+
+        match ans.trim().to_lowercase().as_str() {
+            "yes" | "ok" | "y" | "o" => continue,
+            _ => break,
+        }
+    }
+    let inserted_obj = serde_yaml::to_string(&objs)?;
+    d_log!("inserting objects to : {}", &path.as_ref().display());
+    d_log!("with data {:?}", &inserted_obj);
+    objects::trunc_line(&path, &inserted_obj)?;
+    Ok(())
 }

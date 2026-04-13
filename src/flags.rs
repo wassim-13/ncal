@@ -1,5 +1,5 @@
-use crate::{d_log, debug};
-use std::{path::PathBuf, process::exit};
+use crate::{d_log, debug, run};
+use std::{env, path::PathBuf, process::exit};
 
 #[derive(Clone, Debug)]
 pub struct RunMode {
@@ -7,6 +7,8 @@ pub struct RunMode {
     pub list: bool,
     pub normal: bool,
     pub minimal: bool,
+    pub insert: bool,
+    pub clear: bool,
 }
 
 #[derive(Clone, Debug)]
@@ -16,12 +18,14 @@ pub struct FlData {
     pub data_tf: Vec<String>,
     pub data_s: f64,
     pub runmod: RunMode,
-    pub file: PathBuf,
+    pub t_file: PathBuf,
+    pub o_file: PathBuf,
 }
-fn set_false(b1: &mut bool, b2: &mut bool, b3: &mut bool) {
+fn set_false(b1: &mut bool, b2: &mut bool, b3: &mut bool, b4: &mut bool) {
     *b1 = false;
     *b2 = false;
     *b3 = false;
+    *b4 = false;
 }
 impl FlData {
     pub fn parse_args(&mut self, args: &Vec<String>) {
@@ -33,6 +37,9 @@ impl FlData {
         let mut add_file = false;
         let mut is_fadd = true;
 
+        let mut add_ofile = false;
+        let mut is_ofadd = true;
+
         for arg in args {
             if arg.starts_with('-') {
                 for ch in arg.chars() {
@@ -42,26 +49,35 @@ impl FlData {
                             print_help();
                             exit(0);
                         }
-                        'l' => self.runmod.list = true,
+                        'l' => {
+                            self.runmod.list = true;
+                            self.runmod.normal = false
+                        }
                         'g' => {
                             add_g = true;
                             self.runmod.normal = true;
-                            set_false(&mut add_s, &mut add_f, &mut add_file);
+                            set_false(&mut add_s, &mut add_f, &mut add_file, &mut add_ofile);
                         }
                         'a' => {
                             add_f = true;
                             self.runmod.normal = true;
-                            set_false(&mut add_s, &mut add_g, &mut add_file);
+                            set_false(&mut add_s, &mut add_g, &mut add_file, &mut add_ofile);
                         }
+                        'c' => self.runmod.clear = true,
                         'w' => {
                             add_s = true;
                             self.runmod.normal = true;
-                            set_false(&mut add_g, &mut add_f, &mut add_file);
+                            set_false(&mut add_g, &mut add_f, &mut add_file, &mut add_ofile);
                         }
                         'f' => {
                             add_file = true;
                             self.runmod.normal = true;
-                            set_false(&mut add_g, &mut add_f, &mut add_s);
+                            set_false(&mut add_g, &mut add_f, &mut add_s, &mut add_ofile);
+                        }
+                        'o' => {
+                            add_ofile = true;
+                            self.runmod.normal = true;
+                            set_false(&mut add_g, &mut add_f, &mut add_s, &mut add_file);
                         }
                         'm' => self.runmod.minimal = true,
                         'v' => {
@@ -74,6 +90,7 @@ impl FlData {
                             println!("here' the file to add stuff $proj_dir/data/objects.yaml");
                             println!("see it's just yaml to make your life easier ;)");
                         }
+                        'I' => self.runmod.insert = true,
                         _ => {
                             println!("option {ch} not found!");
                             exit(1);
@@ -88,21 +105,23 @@ impl FlData {
                         }
                         "--list" => {
                             self.runmod.list = true;
+                            self.runmod.normal = false;
                         }
+                        "--clear" => self.runmod.clear = true,
                         "--add" => {
                             add_f = true;
                             self.runmod.normal = true;
-                            set_false(&mut add_s, &mut add_g, &mut add_file);
+                            set_false(&mut add_s, &mut add_g, &mut add_file, &mut add_ofile);
                         }
                         "--get" => {
                             add_g = true;
                             self.runmod.normal = true;
-                            set_false(&mut add_s, &mut add_f, &mut add_file);
+                            set_false(&mut add_s, &mut add_f, &mut add_file, &mut add_ofile);
                         }
                         "--set-weight" => {
                             add_s = true;
                             self.runmod.normal = true;
-                            set_false(&mut add_g, &mut add_f, &mut add_file);
+                            set_false(&mut add_g, &mut add_f, &mut add_file, &mut add_ofile);
                         }
                         "--insert" => {
                             println!("adding items will cost unecessarly performance!");
@@ -110,10 +129,16 @@ impl FlData {
                             println!("here' the file to add stuff $proj_dir/data/objects.yaml");
                             println!("see it's just yaml to make your life easier ;)");
                         }
+                        "--force-insert" => self.runmod.insert = true,
                         "--s-file" => {
                             add_file = true;
                             self.runmod.normal = true;
-                            set_false(&mut add_g, &mut add_f, &mut add_s);
+                            set_false(&mut add_g, &mut add_f, &mut add_s, &mut add_ofile);
+                        }
+                        "--o-file" => {
+                            add_file = true;
+                            self.runmod.normal = true;
+                            set_false(&mut add_g, &mut add_f, &mut add_s, &mut add_ofile);
                         }
                         "--minimal" => self.runmod.minimal = true,
                         "--verbose" => {
@@ -140,9 +165,21 @@ impl FlData {
                     }
                 }
             } else if add_file && is_fadd {
-                d_log!("-> adding file path : {arg}");
+                d_log!("-> adding file path of total : {arg}");
+                if !run::check_file(arg) {
+                    println!("file {arg} does not exist! skipping..");
+                    continue;
+                };
                 is_fadd = false;
-                self.file = PathBuf::from(arg);
+                self.t_file = PathBuf::from(arg);
+            } else if add_ofile && is_ofadd {
+                d_log!("-> adding file path of objects : {arg}");
+                if !run::check_file(arg) {
+                    println!("file {arg} does not exist! skipping..");
+                    continue;
+                };
+                is_ofadd = false;
+                self.o_file = PathBuf::from(arg);
             } else if add_g {
                 d_log!("-> adding item {arg} to get list");
                 self.data_tg.push(arg.to_string());
@@ -156,13 +193,16 @@ impl FlData {
         }
     }
     pub fn new() -> Self {
+        let default_app_dir = env::home_dir().unwrap_or_default().join(".ncal");
+
         Self {
             data_tg: Vec::new(),
             data_ta: Vec::new(),
             data_tf: Vec::new(),
             data_s: 50.0,
             runmod: RunMode::new(),
-            file: PathBuf::from("/home/wassim/foo/cal/data/data.yaml"),
+            t_file: default_app_dir.join("data/data.yaml"),
+            o_file: default_app_dir.join("data/objects.yaml"),
         }
     }
 }
@@ -173,21 +213,31 @@ impl RunMode {
             minimal: false,
             normal: true,
             verbose: false,
+            insert: false,
+            clear: false,
         }
     }
 }
+
 fn print_help() {
     println!(
-        "        Ncal - Nutrition Calculator
-        Usage: ncal [OPTIONS] [args]
+        "
+        Ncal - Nutrition Calculator
+    
+    Usage: ncal [OPTIONS] [args]
 
 Options:
     -h, --help         Show this help message
-    -v, --verbose      Enable verbose output
-    -s, --set-weight   Set the weight to
     -a, --add          Remember the input
-    -i, --insert       Insert an item to objects 
+    -c, --clear        Clear the saved total nut
+    -f, --s-file       Set where to save total nut 
     -g, --get          Get nutrition of the input
-    -l, --list         List all food"
+    -i, --insert       Insert an item to objects 
+    -l, --list         List all food
+    -m, --minimal      Minimal mode
+    -o, --o-file       Set where objects are located
+    -v, --verbose      Enable verbose output
+    -w, --set-weight   Set the weight
+"
     );
 }

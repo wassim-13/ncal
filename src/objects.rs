@@ -4,7 +4,11 @@ use crate::{
     d_log,
     printing::{Color, left_right, progress_bar},
 };
-use std::{fs, io::Write, path::Path};
+use std::{
+    error, fs,
+    io::{self, Write},
+    path::Path,
+};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Nut {
@@ -21,8 +25,8 @@ impl<'a> IntoIterator for &'a mut Nut {
 
     fn into_iter(self) -> Self::IntoIter {
         [
-            &mut self.carb,
             &mut self.cal,
+            &mut self.carb,
             &mut self.prot,
             &mut self.fiber,
             &mut self.fat,
@@ -56,23 +60,23 @@ impl Nut {
         print!(
             "{}\n{}\n{}\n{}\n",
             left_right(
-                &format!("carbs : {:.2}", self.carb),
-                &progress_bar(needs.carb - self.carb, needs.carb, 25, Color::Orange),
+                &format!("carbs : {:.2}", (needs.carb - self.carb).max(0.0)),
+                &progress_bar(self.carb, needs.carb, 25, Color::Orange),
                 53
             ),
             left_right(
-                &format!("proteins : {:.2}", self.prot),
-                &progress_bar(needs.prot - self.prot, needs.prot, 25, Color::Grey),
+                &format!("proteins : {:.2}", (needs.prot - self.prot).max(0.0)),
+                &progress_bar(self.prot, needs.prot, 25, Color::Grey),
                 53
             ),
             left_right(
-                &format!("fat : {:.2}", self.fat),
-                &progress_bar(needs.fat - self.fat, needs.fat, 25, Color::Amber),
+                &format!("fat : {:.2}", (needs.fat - self.fat).max(0.0)),
+                &progress_bar(self.fat, needs.fat, 25, Color::Amber),
                 53
             ),
             left_right(
-                &format!("fiber : {:.2}", self.fiber),
-                &progress_bar(needs.fiber - self.fiber, needs.fiber, 25, Color::Green),
+                &format!("fiber : {:.2}", (needs.fiber - self.fiber).max(0.0)),
+                &progress_bar(self.fiber, needs.fiber, 25, Color::Green),
                 53
             ),
         );
@@ -105,10 +109,7 @@ pub fn get_nut_from_file<P: AsRef<Path>>(path: P) -> Nut {
         }
     }
 }
-pub fn store_nut_to_file<P: AsRef<Path>>(
-    path: P,
-    nuts: &Nut,
-) -> Result<(), Box<dyn std::error::Error>> {
+pub fn store_nut_to_file<P: AsRef<Path>>(path: P, nuts: &Nut) -> Result<(), Box<dyn error::Error>> {
     d_log!(
         "==> storing nut to file with path {} and nuts {nuts:?}",
         path.as_ref().display()
@@ -126,5 +127,21 @@ pub fn store_nut_to_file<P: AsRef<Path>>(
         .open(path)?;
 
     file.write_all(contents.as_bytes())?;
+    Ok(())
+}
+
+pub fn trunc_line<P: AsRef<Path>>(path: &P, line: &String) -> io::Result<()> {
+    if let Some(parent) = path.as_ref().parent() {
+        std::fs::create_dir_all(parent)?;
+    }
+
+    let mut file = fs::OpenOptions::new()
+        .create(true)
+        .read(true)
+        .write(true)
+        .truncate(true)
+        .open(path)?;
+
+    write!(file, "{line}")?;
     Ok(())
 }

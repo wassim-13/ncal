@@ -1,0 +1,210 @@
+almond:
+  cal: 5.8
+  carb: 0.21
+  prot: 0.0
+  fiber: 0.12
+  fat: 0.5
+amlo:
+  cal: 5.58
+  carb: 0.338
+  prot: 0.122
+  fiber: 0.069
+  fat: 0.453
+apple:
+  cal: 0.52
+  carb: 0.14
+  prot: 0.0
+  fiber: 0.02
+  fat: 0.0
+avocado:
+  cal: 1.6
+  carb: 0.085
+  prot: 0.02
+  fiber: 0.067
+  fat: 0.147
+banana:
+  cal: 0.89
+  carb: 0.13
+  prot: 0.15
+  fiber: 0.02
+  fat: 0.0
+beans:
+  cal: 1.3
+  carb: 0.25
+  prot: 0.06
+  fiber: 0.15
+  fat: 0.0
+beef:
+  cal: 2.5
+  carb: 0.0
+  prot: 0.26
+  fiber: 0.0
+  fat: 0.15
+bisara:
+  cal: 0.85
+  carb: 0.13
+  prot: 0.15
+  fiber: 0.02
+  fat: 0.0
+bread:
+  cal: 2.7
+  carb: 0.5
+  prot: 0.12
+  fiber: 0.02
+  fat: 0.02
+carrot:
+  cal: 0.41
+  carb: 0.1
+  prot: 0.03
+  fiber: 0.028
+  fat: 0.0
+chickenb:
+  cal: 1.2
+  carb: 0.0
+  prot: 0.22
+  fiber: 0.0
+  fat: 0.03
+chickpeas:
+  cal: 1.64
+  carb: 0.27
+  prot: 0.089
+  fiber: 0.076
+  fat: 0.02
+chocolate:
+  cal: 5.3
+  carb: 0.0
+  prot: 0.0
+  fiber: 0.03
+  fat: 0.3
+dates:
+  cal: 2.77
+  carb: 0.75
+  prot: 0.12
+  fiber: 0.07
+  fat: 0.0
+eggs:
+  cal: 1.55
+  carb: 0.01
+  prot: 0.13
+  fiber: 0.0
+  fat: 0.11
+fava:
+  cal: 0.3
+  carb: 0.065
+  prot: 0.025
+  fiber: 0.2
+  fat: 0.002
+fish:
+  cal: 1.5
+  carb: 0.0
+  prot: 0.28
+  fiber: 0.0
+  fat: 0.07
+grape:
+  cal: 0.69
+  carb: 0.18
+  prot: 0.0
+  fiber: 0.009
+  fat: 0.0
+honey:
+  cal: 3.04
+  carb: 0.82
+  prot: 0.12
+  fiber: 0.002
+  fat: 0.0
+lamb:
+  cal: 2.94
+  carb: 0.0
+  prot: 0.25
+  fiber: 0.0
+  fat: 0.1
+lentils:
+  cal: 1.16
+  carb: 0.2
+  prot: 0.09
+  fiber: 0.079
+  fat: 0.0
+mango:
+  cal: 0.6
+  carb: 0.15
+  prot: 0.0
+  fiber: 0.016
+  fat: 0.0
+melon:
+  cal: 0.3
+  carb: 0.08
+  prot: 0.0
+  fiber: 0.008
+  fat: 0.0
+oats:
+  cal: 4.3
+  carb: 0.66
+  prot: 0.12
+  fiber: 0.1
+  fat: 0.06
+oil:
+  cal: 9.0
+  carb: 0.0
+  prot: 0.0
+  fiber: 0.0
+  fat: 1.0
+onion:
+  cal: 0.4
+  carb: 0.09
+  prot: 0.01
+  fiber: 0.02
+  fat: 0.0
+orange:
+  cal: 0.47
+  carb: 0.12
+  prot: 0.01
+  fiber: 0.025
+  fat: 0.0
+peanut:
+  cal: 6.67
+  carb: 0.16
+  prot: 0.25
+  fiber: 0.08
+  fat: 0.49
+pear:
+  cal: 0.57
+  carb: 0.15
+  prot: 0.0
+  fiber: 0.03
+  fat: 0.0
+pntbutter:
+  cal: 6.25
+  carb: 0.0
+  prot: 0.0
+  fiber: 0.05
+  fat: 0.5
+potato:
+  cal: 0.75
+  carb: 0.2
+  prot: 0.02
+  fiber: 0.02
+  fat: 0.0
+raisins:
+  cal: 3.0
+  carb: 0.79
+  prot: 0.0
+  fiber: 0.037
+  fat: 0.0
+rice:
+  cal: 1.3
+  carb: 0.28
+  prot: 0.06
+  fiber: 0.004
+  fat: 0.003
+squid:
+  cal: 0.92
+  carb: 0.02
+  prot: 0.15
+  fiber: 0.0
+  fat: 0.013
+tomato:
+  cal: 0.18
+  carb: 0.04
+  prot: 0.0
+  fiber: 0.01
+  fat: 0.0

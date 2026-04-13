@@ -12,13 +12,25 @@ pub enum Nwc<'a> {
 fn eval_num(expr: &str) -> f64 {
     d_log!("==> evaluating expr {expr}");
     match eval_float(expr) {
-        Ok(val) => val,
+        Ok(val) => {
+            d_log!("-> expression = {val}");
+            val
+        }
         Err(err) => match err {
             EvalexprError::ExpectedFloat { actual: _ } => match eval_int(expr) {
-                Ok(val) => val as f64,
-                Err(_) => 0.0,
+                Ok(val) => {
+                    d_log!("-> expression = {val}");
+                    val as f64
+                }
+                Err(_) => {
+                    d_log!("-> expression = 0.0");
+                    0.0
+                }
             },
-            _ => 0.0,
+            _ => {
+                d_log!("-> expression = 0.0");
+                0.0
+            }
         },
     }
 }
