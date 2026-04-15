@@ -40,57 +40,78 @@ impl FlData {
         let mut add_ofile = false;
         let mut is_ofadd = true;
 
+        d_log!("parsing args");
+
         for arg in args {
+            d_log!("arg {arg}");
             if arg.starts_with('-') {
                 for ch in arg.chars() {
                     match ch {
-                        '-' => continue,
+                        '-' => break,
                         'h' => {
+                            d_log!("found option h");
                             print_help();
                             exit(0);
                         }
                         'l' => {
+                            d_log!("found option l");
                             self.runmod.list = true;
                             self.runmod.normal = false
                         }
                         'g' => {
+                            d_log!("found option g");
                             add_g = true;
                             self.runmod.normal = true;
                             set_false(&mut add_s, &mut add_f, &mut add_file, &mut add_ofile);
                         }
                         'a' => {
+                            d_log!("found option a");
                             add_f = true;
                             self.runmod.normal = true;
                             set_false(&mut add_s, &mut add_g, &mut add_file, &mut add_ofile);
                         }
-                        'c' => self.runmod.clear = true,
+                        'c' => {
+                            d_log!("found option c");
+                            self.runmod.clear = true;
+                        }
                         'w' => {
+                            d_log!("found option w");
                             add_s = true;
                             self.runmod.normal = true;
                             set_false(&mut add_g, &mut add_f, &mut add_file, &mut add_ofile);
                         }
                         'f' => {
+                            d_log!("found option f");
                             add_file = true;
                             self.runmod.normal = true;
                             set_false(&mut add_g, &mut add_f, &mut add_s, &mut add_ofile);
                         }
                         'o' => {
+                            d_log!("found option o");
                             add_ofile = true;
                             self.runmod.normal = true;
                             set_false(&mut add_g, &mut add_f, &mut add_s, &mut add_file);
                         }
-                        'm' => self.runmod.minimal = true,
+                        'm' => {
+                            d_log!("found option m");
+                            self.runmod.minimal = true;
+                        }
                         'v' => {
+                            d_log!("found option v");
                             self.runmod.verbose = true;
                             debug::set_debug(self.runmod.verbose);
                         }
                         'i' => {
+                            d_log!("found option i");
                             println!("adding items will cost unecessarly performance!");
                             println!("add items by your self bro");
                             println!("here' the file to add stuff $proj_dir/data/objects.yaml");
                             println!("see it's just yaml to make your life easier ;)");
                         }
-                        'I' => self.runmod.insert = true,
+                        'I' => {
+                            d_log!("found option I");
+                            self.runmod.insert = true;
+                        }
                         _ => {
                             println!("option {ch} not found!");
                             exit(1);
@@ -100,48 +121,66 @@ impl FlData {
                 if arg.starts_with("--") {
                     match arg.as_str() {
                         "--help" => {
+                            d_log!("found option {arg}");
                             print_help();
                             exit(0);
                         }
                         "--list" => {
+                            d_log!("found option {arg}");
                             self.runmod.list = true;
                             self.runmod.normal = false;
                         }
-                        "--clear" => self.runmod.clear = true,
+                        "--clear" => {
+                            d_log!("found option {arg}");
+                            self.runmod.clear = true;
+                        }
                         "--add" => {
+                            d_log!("found option {arg}");
                             add_f = true;
                             self.runmod.normal = true;
                             set_false(&mut add_s, &mut add_g, &mut add_file, &mut add_ofile);
                         }
                         "--get" => {
+                            d_log!("found option {arg}");
                             add_g = true;
                             self.runmod.normal = true;
                             set_false(&mut add_s, &mut add_f, &mut add_file, &mut add_ofile);
                         }
                         "--set-weight" => {
+                            d_log!("found option {arg}");
                             add_s = true;
                             self.runmod.normal = true;
                             set_false(&mut add_g, &mut add_f, &mut add_file, &mut add_ofile);
                         }
                         "--insert" => {
+                            d_log!("found option {arg}");
                             println!("adding items will cost unecessarly performance!");
                             println!("add items by your self bro");
                             println!("here' the file to add stuff $proj_dir/data/objects.yaml");
                             println!("see it's just yaml to make your life easier ;)");
                         }
-                        "--force-insert" => self.runmod.insert = true,
+                        "--force-insert" => {
+                            d_log!("found option {arg}");
+                            self.runmod.insert = true;
+                        }
                         "--s-file" => {
+                            d_log!("found option {arg}");
                             add_file = true;
                             self.runmod.normal = true;
                             set_false(&mut add_g, &mut add_f, &mut add_s, &mut add_ofile);
                         }
                         "--o-file" => {
+                            d_log!("found option {arg}");
                             add_file = true;
                             self.runmod.normal = true;
                             set_false(&mut add_g, &mut add_f, &mut add_s, &mut add_ofile);
                         }
-                        "--minimal" => self.runmod.minimal = true,
+                        "--minimal" => {
+                            d_log!("found option {arg}");
+                            self.runmod.minimal = true
+                        }
                         "--verbose" => {
+                            d_log!("found option {arg}");
                             self.runmod.verbose = true;
                             debug::set_debug(self.runmod.verbose);
                         }

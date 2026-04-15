@@ -1,6 +1,6 @@
 use std::sync::atomic::{AtomicBool, Ordering};
 
-pub static DEBUG: AtomicBool = AtomicBool::new(false);
+pub static DEBUG: AtomicBool = AtomicBool::new(true);
 
 pub fn set_debug(value: bool) {
     DEBUG.store(value, Ordering::Relaxed);

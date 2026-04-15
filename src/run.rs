@@ -88,6 +88,7 @@ impl RunC {
         if self.data.runmod.insert {
             insert_item(&self.data.o_file, &mut self.objects).unwrap();
         }
+        d_log!("runmode : {:#?}", &self.data.runmod);
     }
     pub fn run(mut self) {
         let runmod = &self.data.runmod;
@@ -95,7 +96,10 @@ impl RunC {
 
         if runmod.normal && runmod.list {
             println!("incompatible options `list` and `normal`");
-            println!("however heres the list");
+            process::exit(1);
+        }
+        if runmod.list {
+            println!("=> listing all items : ");
             self.list_all();
             process::exit(0);
         }
