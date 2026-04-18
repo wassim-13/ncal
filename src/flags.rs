@@ -40,12 +40,10 @@ impl FlData {
         let mut add_ofile = false;
         let mut is_ofadd = true;
 
-        d_log!("parsing args");
-
         for arg in args {
             d_log!("arg {arg}");
             if arg.starts_with('-') {
-                for ch in arg.chars() {
+                for ch in arg.chars().skip(1) {
                     match ch {
                         '-' => break,
                         'h' => {
@@ -100,6 +98,10 @@ impl FlData {
                             d_log!("found option v");
                             self.runmod.verbose = true;
                             debug::set_debug(self.runmod.verbose);
+                        }
+                        'V' => {
+                            println!("ncal v{}", env!("CARGO_PKG_VERSION"));
+                            exit(0);
                         }
                         'i' => {
                             d_log!("found option i");
@@ -184,6 +186,10 @@ impl FlData {
                             self.runmod.verbose = true;
                             debug::set_debug(self.runmod.verbose);
                         }
+                        "--version" => {
+                            println!("ncal v{}", env!("CARGO_PKG_VERSION"));
+                            exit(0);
+                        }
                         _ => {
                             println!("option arg {arg} not found");
                             exit(1);
@@ -267,6 +273,7 @@ fn print_help() {
 
 Options:
     -h, --help         Show this help message
+    -V, --version      Print Version and exit
     -a, --add          Remember the input
     -c, --clear        Clear the saved total nut
     -f, --s-file       Set where to save total nut 
