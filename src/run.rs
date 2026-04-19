@@ -116,6 +116,10 @@ impl RunC {
         if b2 {
             self.run_as_addn();
         }
+        if self.data.runmod.needs {
+            println!("\n=> total needs\n");
+            self.pnut.print();
+        }
         self.print_water();
     }
     fn run_as_getn(&self) {

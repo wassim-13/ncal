@@ -6,6 +6,7 @@ pub struct RunMode {
     pub verbose: bool,
     pub list: bool,
     pub normal: bool,
+    pub needs: bool,
     pub minimal: bool,
     pub insert: bool,
     pub clear: bool,
@@ -94,6 +95,10 @@ impl FlData {
                             d_log!("found option m");
                             self.runmod.minimal = true;
                         }
+                        'n' => {
+                            d_log!("found option n");
+                            self.runmod.needs = true;
+                        }
                         'v' => {
                             d_log!("found option v");
                             self.runmod.verbose = true;
@@ -181,6 +186,10 @@ impl FlData {
                             d_log!("found option {arg}");
                             self.runmod.minimal = true
                         }
+                        "--needs" => {
+                            d_log!("found option {arg}");
+                            self.runmod.needs = true;
+                        }
                         "--verbose" => {
                             d_log!("found option {arg}");
                             self.runmod.verbose = true;
@@ -244,7 +253,7 @@ impl FlData {
             data_tg: Vec::new(),
             data_ta: Vec::new(),
             data_tf: Vec::new(),
-            data_s: 50.0,
+            data_s: 70.0,
             runmod: RunMode::new(),
             t_file: default_app_dir.join("data/data.yaml"),
             o_file: default_app_dir.join("data/objects.yaml"),
@@ -260,6 +269,7 @@ impl RunMode {
             verbose: false,
             insert: false,
             clear: false,
+            needs: false,
         }
     }
 }
@@ -281,6 +291,7 @@ Options:
     -i, --insert       Insert an item to objects 
     -l, --list         List all food
     -m, --minimal      Minimal mode
+    -n, --needs        Print needs based on weight
     -o, --o-file       Set where objects are located
     -v, --verbose      Enable verbose output
     -w, --set-weight   Set the weight
