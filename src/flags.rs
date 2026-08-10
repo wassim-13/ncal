@@ -1,5 +1,56 @@
 use crate::{d_log, debug, run};
-use std::{env, path::PathBuf, process::exit};
+use std::{
+    env, fs,
+    path::{Path, PathBuf},
+    process::exit,
+};
+
+#[derive(serde::Serialize, serde::Deserialize)]
+struct Config {
+    o_path: PathBuf,
+}
+
+fn set_o_file<P: AsRef<Path>>(path: P) {
+    let temp_obj = Config {
+        o_path: PathBuf::from(path.as_ref()),
+    };
+    let c_path = env::home_dir().unwrap().join(".config/ncal/config.json");
+    let content: String = serde_json::to_string(&temp_obj).unwrap_or_default();
+    fs::write(c_path, content).unwrap();
+}
+
+fn cool_function() -> Config {
+    let home = PathBuf::from(env::var("HOME").unwrap_or_default());
+    let path = home.join(".config/ncal/config.json");
+
+    let ob_path = home.join(".local/share/ncal/objects.yaml");
+
+    if !ob_path.exists()
+        && let Some(o_parent) = ob_path.parent()
+    {
+        fs::create_dir_all(o_parent).expect("Failed to create parent directories");
+        fs::write(&ob_path, "").unwrap_or_default();
+    }
+
+    let mut config = Config { o_path: ob_path };
+
+    if path.exists() {
+        let contents = fs::read_to_string(&path).unwrap_or_default();
+        let obj: Option<Config> = serde_json::from_str(&contents).ok();
+        if let Some(conf) = obj {
+            config = conf;
+        }
+    }
+
+    if let Some(parent) = path.parent() {
+        fs::create_dir_all(parent).expect("Failed to create parent directories");
+    }
+
+    let content = serde_json::to_string(&config).unwrap_or_default();
+
+    fs::write(path, &content).expect("Failed to write default data to file");
+    config
+}
 
 #[derive(Clone, Debug)]
 pub struct RunMode {
@@ -233,7 +284,11 @@ impl FlData {
                     continue;
                 };
                 is_ofadd = false;
-                self.o_file = PathBuf::from(arg);
+                self.o_file = PathBuf::from(&arg);
+                // TODO:
+                //  add the file to the json conf
+                set_o_file(arg.as_str());
+                //--------
             } else if add_g {
                 d_log!("-> adding item {arg} to get list");
                 self.data_tg.push(arg.to_string());
@@ -256,7 +311,9 @@ impl FlData {
             data_s: 70.0,
             runmod: RunMode::new(),
             t_file: default_app_dir.join("data/data.yaml"),
-            o_file: default_app_dir.join("data/objects.yaml"),
+            o_file: cool_function().o_path,
+            // TODO :
+            // the default path should be loaded from json conf
         }
     }
 }

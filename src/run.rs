@@ -1,8 +1,8 @@
 use crate::d_log;
 use crate::flags::FlData;
 use crate::objects::{self, Nut};
-use crate::parse::{Nwc, get_w_add};
-use crate::printing::{Color, progress_bar};
+use crate::parse::{get_w_add, Nwc};
+use crate::printing::{progress_bar, Color};
 
 use std::io::Write;
 use std::path::Path;
