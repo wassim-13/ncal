@@ -36,7 +36,6 @@ impl RunC {
     pub fn init(&mut self) {
         self.data.parse_args(env::args().skip(1));
         d_log!("-> parsing args, done");
-        d_log!("-> clearing args, done");
         d_log!(
             "-> setting filepath, done\n        filepath : {}",
             self.data.t_file.display()
