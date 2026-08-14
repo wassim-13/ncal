@@ -95,7 +95,7 @@ impl Nut {
 pub fn get_nut_from_file<P: AsRef<Path>>(path: P) -> Nut {
     d_log!("==> getting nut from file {}", path.as_ref().display());
     let contents = fs::read_to_string(path).unwrap_or_default();
-    match serde_yaml::from_str(&contents) {
+    match serde_yaml_neo::from_str(&contents) {
         Ok(nu) => nu,
         Err(err) => {
             eprint!("error : {err}");
@@ -118,7 +118,7 @@ pub fn store_nut_to_file<P: AsRef<Path>>(path: P, nuts: &Nut) -> Result<(), Box<
         fs::create_dir_all(parent)?;
     }
 
-    let contents = serde_yaml::to_string(&nuts)?;
+    let contents = serde_yaml_neo::to_string(&nuts)?;
 
     let mut file = fs::OpenOptions::new()
         .create(true)

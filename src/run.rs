@@ -1,8 +1,8 @@
 use crate::d_log;
 use crate::flags::FlData;
 use crate::objects::{self, Nut};
-use crate::parse::{get_w_add, Nwc};
-use crate::printing::{progress_bar, Color};
+use crate::parse::{Nwc, get_w_add};
+use crate::printing::{Color, progress_bar};
 
 use std::io::Write;
 use std::path::Path;
@@ -12,7 +12,6 @@ use std::{fs, io};
 #[derive(Clone, Debug)]
 pub struct RunC {
     data: FlData,
-    args: Vec<String>,
     tnut: Nut,
     pnut: Nut,
     tliter: f64,
@@ -28,7 +27,6 @@ impl RunC {
     pub fn new() -> Self {
         Self {
             data: FlData::new(),
-            args: Vec::new(),
             tnut: Nut::new(),
             pnut: Nut::new(),
             tliter: 3.0,
@@ -36,11 +34,8 @@ impl RunC {
         }
     }
     pub fn init(&mut self) {
-        self.args = env::args().collect();
-        self.args.remove(0);
-        self.data.parse_args(&self.args);
+        self.data.parse_args(env::args().skip(1));
         d_log!("-> parsing args, done");
-        self.args.clear();
         d_log!("-> clearing args, done");
         d_log!(
             "-> setting filepath, done\n        filepath : {}",
@@ -79,7 +74,7 @@ impl RunC {
 
         d_log!("-> opjects path : {}", &self.data.o_file.display());
         let contents = fs::read_to_string(&self.data.o_file).unwrap_or_default();
-        self.objects = serde_yaml::from_str(&contents).unwrap_or_default();
+        self.objects = serde_yaml_neo::from_str(&contents).unwrap_or_default();
 
         d_log!(
             "-> successfully loaded {} objects",
@@ -226,7 +221,7 @@ fn insert_item<P: AsRef<Path>>(
             _ => break,
         }
     }
-    let inserted_obj = serde_yaml::to_string(&objs)?;
+    let inserted_obj = serde_yaml_neo::to_string(&objs)?;
     d_log!("inserting objects to : {}", &path.as_ref().display());
     d_log!("with data {:?}", &inserted_obj);
     objects::trunc_line(&path, &inserted_obj)?;

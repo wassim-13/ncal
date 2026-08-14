@@ -1,6 +1,7 @@
 use crate::{d_log, debug, run};
 use std::{
-    env, fs,
+    env::{self},
+    fs,
     path::{Path, PathBuf},
     process::exit,
 };
@@ -80,7 +81,7 @@ fn set_false(b1: &mut bool, b2: &mut bool, b3: &mut bool, b4: &mut bool) {
     *b4 = false;
 }
 impl FlData {
-    pub fn parse_args(&mut self, args: &Vec<String>) {
+    pub fn parse_args(&mut self, args: impl Iterator<Item = String>) {
         let mut add_g = false;
         let mut add_f = false;
         let mut add_s = false;
@@ -92,7 +93,8 @@ impl FlData {
         let mut add_ofile = false;
         let mut is_ofadd = true;
 
-        for arg in args {
+        for arg_ in args {
+            let arg = &arg_[..];
             d_log!("arg {arg}");
             if arg.starts_with('-') {
                 for ch in arg.chars().skip(1) {
@@ -177,7 +179,7 @@ impl FlData {
                     }
                 }
                 if arg.starts_with("--") {
-                    match arg.as_str() {
+                    match arg {
                         "--help" => {
                             d_log!("found option {arg}");
                             print_help();
@@ -287,7 +289,7 @@ impl FlData {
                 self.o_file = PathBuf::from(&arg);
                 // TODO:
                 //  add the file to the json conf
-                set_o_file(arg.as_str());
+                set_o_file(arg);
                 //--------
             } else if add_g {
                 d_log!("-> adding item {arg} to get list");
